@@ -1,5 +1,6 @@
 package com.alibaba.excel.write;
 
+import com.alibaba.excel.context.WriteContext;
 import com.alibaba.excel.metadata.Sheet;
 import com.alibaba.excel.metadata.Table;
 
@@ -49,4 +50,24 @@ public interface ExcelBuilder {
      * Close io
      */
     void finish();
+
+    /**
+     *
+     * @return
+     */
+    WriteContext getContext();
+
+    /**
+     *
+     * @param sheetParam
+     * @param hiddenName
+     * @param dataList
+     * @param sheetIndex
+     * @param beginRow
+     * @param endRow
+     * @param beginColumn
+     * @param endColumn
+     */
+    void addConstrainValationToSheet( Sheet sheetParam, String hiddenName,
+                                              List<String> dataList, int sheetIndex, int beginRow, int endRow, int beginColumn, int endColumn);
 }

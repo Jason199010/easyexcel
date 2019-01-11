@@ -181,9 +181,29 @@ public class ExcelWriter {
     }
 
     /**
+     * Write validation to sheet
+     * @param sheetParam
+     * @param hiddenName
+     * @param dataList
+     * @param sheetIndex
+     * @param beginRow
+     * @param endRow
+     * @param beginColumn
+     * @param endColumn
+     * @return
+     */
+    public ExcelWriter writeValidation( Sheet sheetParam, String hiddenName,
+                                        List<String> dataList, int sheetIndex, int beginRow, int endRow, int beginColumn, int endColumn) {
+        excelBuilder.addConstrainValationToSheet(sheetParam, hiddenName, dataList, sheetIndex, beginRow, endRow, beginColumn, endColumn);
+        return this;
+    }
+
+    /**
      * Close IO
      */
     public void finish() {
         excelBuilder.finish();
     }
+
+    public ExcelBuilder getExcelBuilder(){return excelBuilder;}
 }

@@ -1,14 +1,16 @@
 package com.alibaba.excel.util;
 
 import com.alibaba.excel.support.ExcelTypeEnum;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import static com.alibaba.excel.util.StyleUtil.buildSheetStyle;
 

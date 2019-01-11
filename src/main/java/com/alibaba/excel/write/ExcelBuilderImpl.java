@@ -13,10 +13,16 @@ import com.alibaba.excel.util.POITempFile;
 import com.alibaba.excel.util.TypeUtil;
 import com.alibaba.excel.util.WorkBookUtil;
 import net.sf.cglib.beans.BeanMap;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.hssf.usermodel.*;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellRangeAddressList;
+import org.apache.poi.xssf.usermodel.XSSFDataValidation;
+import org.apache.poi.xssf.usermodel.XSSFDataValidationConstraint;
+import org.apache.poi.xssf.usermodel.XSSFDataValidationHelper;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTDataValidation;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.CTDataValidationImpl;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -95,6 +101,36 @@ public class ExcelBuilderImpl implements ExcelBuilder {
         }
     }
 
+    /**
+     * @return
+     */
+    @Override
+    public WriteContext getContext() {
+        return context;
+    }
+
+    /**
+     * write constrain valation to sheet
+     */
+    public void addConstrainValationToSheet(Sheet sheetParam, String hiddenName,
+                                            List<String> dataList1, int sheetIndex, int beginRow, int endRow, int beginColumn, int endColumn) {
+        context.currentSheet(sheetParam);
+        org.apache.poi.ss.usermodel.Sheet currentSheet = context.getCurrentSheet();
+        DataValidationHelper helper = currentSheet.getDataValidationHelper();
+        XSSFDataValidationConstraint dvConstraint = (XSSFDataValidationConstraint) helper
+                .createExplicitListConstraint(dataList1.toArray(new String[dataList1.size()]));
+        // 设置区域边界
+        CellRangeAddressList addressList = new CellRangeAddressList(beginRow, endRow, beginColumn, endColumn);
+        XSSFDataValidation validation = (XSSFDataValidation) helper
+                .createValidation(dvConstraint, addressList);
+        // 输入非法数据时，弹窗警告框
+        validation.setShowErrorBox(true);
+        // 设置提示框
+        //validation.createPromptBox("温馨提示", "请选择性别！！!");
+        //validation.setShowPromptBox(true);
+        currentSheet.addValidationData(validation);
+    }
+
     private void addBasicTypeToExcel(List<Object> oneRowData, Row row) {
         if (CollectionUtils.isEmpty(oneRowData)) {
             return;
@@ -102,7 +138,7 @@ public class ExcelBuilderImpl implements ExcelBuilder {
         for (int i = 0; i < oneRowData.size(); i++) {
             Object cellValue = oneRowData.get(i);
             Cell cell = WorkBookUtil.createCell(row, i, context.getCurrentContentStyle(), cellValue,
-                TypeUtil.isNum(cellValue));
+                    TypeUtil.isNum(cellValue));
             if (null != context.getAfterWriteHandler()) {
                 context.getAfterWriteHandler().cell(i, cell);
             }
@@ -113,13 +149,13 @@ public class ExcelBuilderImpl implements ExcelBuilder {
         int i = 0;
         BeanMap beanMap = BeanMap.create(oneRowData);
         for (ExcelColumnProperty excelHeadProperty : context.getExcelHeadProperty().getColumnPropertyList()) {
-            BaseRowModel baseRowModel = (BaseRowModel)oneRowData;
+            BaseRowModel baseRowModel = (BaseRowModel) oneRowData;
             String cellValue = TypeUtil.getFieldStringValue(beanMap, excelHeadProperty.getField().getName(),
-                excelHeadProperty.getFormat());
+                    excelHeadProperty.getFormat());
             CellStyle cellStyle = baseRowModel.getStyle(i) != null ? baseRowModel.getStyle(i)
-                : context.getCurrentContentStyle();
+                    : context.getCurrentContentStyle();
             Cell cell = WorkBookUtil.createCell(row, i, cellStyle, cellValue,
-                TypeUtil.isNum(excelHeadProperty.getField()));
+                    TypeUtil.isNum(excelHeadProperty.getField()));
             if (null != context.getAfterWriteHandler()) {
                 context.getAfterWriteHandler().cell(i, cell);
             }
@@ -134,7 +170,7 @@ public class ExcelBuilderImpl implements ExcelBuilder {
             context.getAfterWriteHandler().row(n, row);
         }
         if (oneRowData instanceof List) {
-            addBasicTypeToExcel((List)oneRowData, row);
+            addBasicTypeToExcel((List) oneRowData, row);
         } else {
             addJavaObjectToExcel(oneRowData, row);
         }
